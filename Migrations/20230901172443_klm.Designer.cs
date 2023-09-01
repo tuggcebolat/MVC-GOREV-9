@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GOREV_9.Migrations
 {
     [DbContext(typeof(Gorev9DbContext))]
-    [Migration("20230901124051_mig_1")]
-    partial class mig_1
+    [Migration("20230901172443_klm")]
+    partial class klm
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,37 +27,62 @@ namespace GOREV_9.Migrations
 
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
 
                     b.Property<string>("CategoryDescription")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CategoryName")
-                        .HasColumnType("int");
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryDescription = "C",
+                            CategoryName = "Teknoloji"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            CategoryDescription = "D",
+                            CategoryName = "Seyahat"
+                        });
                 });
 
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.CategoryPost", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryId", "PostId");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("CategoryPosts");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            PostId = 1
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            PostId = 2
+                        });
                 });
 
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.Page", b =>
@@ -69,25 +94,28 @@ namespace GOREV_9.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PostId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("Pages");
                 });
 
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.Post", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PostId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostId"));
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -97,20 +125,20 @@ namespace GOREV_9.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("PostId");
 
                     b.ToTable("Posts");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            PostId = 1,
                             Title = "A",
                             Url = "www.tugcebolat.com"
                         },
                         new
                         {
-                            Id = 2,
+                            PostId = 2,
                             Title = "B",
                             Url = "www.bolat.com/blog"
                         });
@@ -139,10 +167,15 @@ namespace GOREV_9.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("PostComments");
                 });
@@ -200,11 +233,20 @@ namespace GOREV_9.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PageId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PageId1");
 
                     b.ToTable("Settings");
                 });
@@ -229,9 +271,53 @@ namespace GOREV_9.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("PostId");
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.CategoryPost", b =>
+                {
+                    b.HasOne("GOREV_9.Models.Data.Entity.Post", "Post")
+                        .WithMany("PostCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GOREV_9.Models.Data.Entity.Category", "Category")
+                        .WithMany("PostCategories")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.Page", b =>
+                {
+                    b.HasOne("GOREV_9.Models.Data.Entity.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.PostComment", b =>
+                {
+                    b.HasOne("GOREV_9.Models.Data.Entity.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.PostImage", b =>
@@ -245,8 +331,42 @@ namespace GOREV_9.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.Setting", b =>
+                {
+                    b.HasOne("GOREV_9.Models.Data.Entity.Page", "Page")
+                        .WithMany("Setting")
+                        .HasForeignKey("PageId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Page");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.User", b =>
+                {
+                    b.HasOne("GOREV_9.Models.Data.Entity.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.Category", b =>
+                {
+                    b.Navigation("PostCategories");
+                });
+
+            modelBuilder.Entity("GOREV_9.Models.Data.Entity.Page", b =>
+                {
+                    b.Navigation("Setting");
+                });
+
             modelBuilder.Entity("GOREV_9.Models.Data.Entity.Post", b =>
                 {
+                    b.Navigation("PostCategories");
+
                     b.Navigation("PostImages");
                 });
 #pragma warning restore 612, 618

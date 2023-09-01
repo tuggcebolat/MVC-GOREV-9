@@ -4,11 +4,11 @@ namespace GOREV_9.Models.Data.Entity
 {
     public class Category
     {
-        [Key]
-        public int Id{ get; set; }
-        public int CategoryName{ get; set; }
-        public string? CategoryDescription { get; set; }
         
+        public int CategoryId{ get; set; }
+        public string? CategoryName{ get; set; }
+        public string? CategoryDescription { get; set; }
+        public List<CategoryPost> PostCategories { get; set; }
     }
     
 }
